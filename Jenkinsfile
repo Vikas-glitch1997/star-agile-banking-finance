@@ -16,5 +16,28 @@ pipeline {
                 sh "mvn -Dmaven.test.failure.ignore=true clean package"
             }
         }
+
+        stage('Generate Test Reports') {
+            steps {
+                // Use relative path to surefire-reports to avoid issues with workspace changes.
+                publishHTML([
+                    allowMissing: false, 
+                    alwaysLinkToLastBuild: false, 
+                    keepAll: false, 
+                    reportDir: 'target/surefire-reports',  // Relative path
+                    reportFiles: 'index.html', 
+                    reportName: 'HTML Report', 
+                    reportTitles: '', 
+                    useWrapperFileDirectly: true
+                ])
+            }
+        }
+
+        stage('Create Docker Image') {
+            steps {
+                // Build a Docker image from the Dockerfile in the root of the project.
+                sh 'docker build -t vikaskumargt/bankingfinance:1.0 .'
+            }
+        }
     }
 }
